@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Fortuna Segreta</title>
+
+<style>
+
+body{
+background:#0a0a0a;
+color:white;
+font-family:Arial;
+text-align:center;
+}
+
+h1{
+color:#ffb300;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(3,110px);
+gap:15px;
+justify-content:center;
+margin-top:30px;
+}
+
+.box{
+width:110px;
+height:110px;
+background:#222;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:40px;
+cursor:pointer;
+border:2px solid #444;
+}
+
+.bar{
+width:300px;
+height:20px;
+background:#333;
+margin:auto;
+margin-top:20px;
+}
+
+.progress{
+height:100%;
+background:#ffb300;
+width:0%;
+}
+
+button{
+
+margin-top:25px;
+padding:12px 20px;
+font-size:16px;
+background:#ffb300;
+border:none;
+cursor:pointer;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Fortuna Segreta</h1>
+
+<p>Trova 3 simboli uguali</p>
+
+<p>💰 Jackpot oggi: 742€</p>
+
+<div class="bar">
+
+<div class="progress" id="luck"></div>
+
+</div>
+
+<div class="grid" id="grid"></div>
+
+<p id="msg"></p>
+
+<button onclick="bonus()">
+🔥 Sblocca altri tentativi 1€
+</button>
+
+<script>
+
+let attempts=2
+
+let opened=[]
+
+let luck=0
+
+let symbols=["💎","💎","💎","💰","💰","🍀","🍀","⭐","❌"]
+
+let grid=document.getElementById("grid")
+
+symbols.sort(()=>Math.random()-0.5)
+
+symbols.forEach((s)=>{
+
+let div=document.createElement("div")
+
+div.className="box"
+
+div.onclick=()=>openBox(div,s)
+
+grid.appendChild(div)
+
+})
+
+function openBox(div,s){
+
+if(attempts<=0)return
+
+if(div.innerHTML!="")return
+
+div.innerHTML=s
+
+opened.push(s)
+
+attempts--
+
+luck+=30
+
+updateLuck()
+
+check()
+
+}
+
+function check(){
+
+if(opened.length==3){
+
+if(opened[0]==opened[1] && opened[1]==opened[2]){
+
+msg("INCREDIBILE! Hai trovato 3 simboli!")
+
+}else{
+
+msg("Quasi... mancava poco!")
+
+}
+
+setTimeout(reset,2000)
+
+}
+
+}
+
+function updateLuck(){
+
+document.getElementById("luck").style.width=luck+"%"
+
+}
+
+function reset(){
+
+opened=[]
+
+attempts=2
+
+luck=0
+
+updateLuck()
+
+let boxes=document.querySelectorAll(".box")
+
+boxes.forEach((b)=>b.innerHTML="")
+
+msg("")
+
+}
+
+function msg(t){
+
+document.getElementById("msg").innerText=t
+
+}
+
+function bonus(){
+
+window.open("https://ko-fi.com/peccatinascosti","_blank")
+
+}
+
+</script>
+
+</body>
+
+</html>
