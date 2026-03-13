@@ -3,12 +3,12 @@
 
 <head>
 
-<title>Ruota del Jackpot</title>
+<title>Super Jackpot Slot</title>
 
 <style>
 
 body{
-background:#0f0f0f;
+background:#070707;
 color:white;
 font-family:Arial;
 text-align:center;
@@ -18,52 +18,78 @@ h1{
 color:#ffb300;
 }
 
-#wheel{
+.jackpot{
+font-size:36px;
+color:#00ff9d;
+margin-top:10px;
+}
 
-width:250px;
-height:250px;
-border-radius:50%;
-border:10px solid #333;
+.bar{
+width:280px;
+height:18px;
+background:#333;
 margin:auto;
-margin-top:30px;
+margin-top:10px;
+}
 
-background:conic-gradient(
-#ff5252 0deg 60deg,
-#ffb300 60deg 120deg,
-#4caf50 120deg 180deg,
-#2196f3 180deg 240deg,
-#9c27b0 240deg 300deg,
-#f44336 300deg 360deg
-);
+.progress{
+height:100%;
+width:0%;
+background:#ffb300;
+}
 
-transition:transform 4s ease-out;
+.slot{
+display:flex;
+justify-content:center;
+gap:12px;
+margin-top:40px;
+}
 
+.reel{
+width:70px;
+height:80px;
+font-size:40px;
+background:#1e1e1e;
+display:flex;
+align-items:center;
+justify-content:center;
+border:3px solid #444;
 }
 
 button{
-
-margin-top:30px;
-padding:12px 25px;
+margin-top:25px;
+padding:14px 28px;
 font-size:18px;
 background:#ffb300;
 border:none;
 cursor:pointer;
-
-}
-
-.jackpot{
-
-font-size:28px;
-margin-top:15px;
-color:#00ff9d;
-
 }
 
 .players{
-
+font-size:14px;
 color:#aaa;
+}
+
+.popup{
+
+position:fixed;
+bottom:20px;
+left:20px;
+background:#111;
+padding:12px;
+border:1px solid #333;
 font-size:14px;
 
+}
+
+.win{
+animation:flash 0.4s infinite;
+}
+
+@keyframes flash{
+0%{background:#1e1e1e}
+50%{background:#ffb300}
+100%{background:#1e1e1e}
 }
 
 </style>
@@ -72,34 +98,48 @@ font-size:14px;
 
 <body>
 
-<h1>Ruota del Jackpot</h1>
+<h1>Super Jackpot Slot</h1>
 
 <p class="players" id="players"></p>
 
 <div class="jackpot">
-
-💰 Jackpot: <span id="jackpot">500</span> €
-
+💰 Jackpot: <span id="jackpot">987</span> €
 </div>
 
-<div id="wheel"></div>
+<div class="bar">
+<div class="progress" id="luck"></div>
+</div>
+
+<div class="slot">
+
+<div class="reel" id="r1">❔</div>
+<div class="reel" id="r2">❔</div>
+<div class="reel" id="r3">❔</div>
+<div class="reel" id="r4">❔</div>
+<div class="reel" id="r5">❔</div>
+
+</div>
 
 <p id="msg"></p>
 
 <button onclick="spin()">
-🎰 Gira la ruota
+🎰 Gira la Slot
 </button>
 
 <br>
 
 <button onclick="bonus()">
-🔥 Sblocca altri giri 1€
+🎰 Sblocca altri giri (1€)
 </button>
+
+<div class="popup" id="popup"></div>
 
 <script>
 
 let spins=1
-let wheel=document.getElementById("wheel")
+let luck=0
+
+let symbols=["💎","💰","⭐","🍀","🔔","7️⃣"]
 
 function spin(){
 
@@ -113,28 +153,79 @@ return
 
 spins--
 
-let random=Math.floor(Math.random()*360)+720
+spinReel("r1",1000)
+spinReel("r2",1500)
+spinReel("r3",2000)
+spinReel("r4",2500)
+spinReel("r5",3000)
 
-wheel.style.transform="rotate("+random+"deg)"
+luck+=20
 
-setTimeout(result,4000)
+updateLuck()
+
+setTimeout(result,3100)
+
+}
+
+function spinReel(id,time){
+
+let reel=document.getElementById(id)
+
+let interval=setInterval(()=>{
+
+reel.innerText=randomSymbol()
+
+},100)
+
+setTimeout(()=>{
+
+clearInterval(interval)
+
+reel.innerText=randomSymbol()
+
+},time)
+
+}
+
+function randomSymbol(){
+
+return symbols[Math.floor(Math.random()*symbols.length)]
 
 }
 
 function result(){
 
-let outcomes=[
-"Riprova",
-"Quasi!",
-"Riprova",
-"Vicino!",
-"Riprova",
-"Jackpot mancato!"
+let reels=[
+
+r1.innerText,
+r2.innerText,
+r3.innerText,
+r4.innerText,
+r5.innerText
+
 ]
 
-let r=outcomes[Math.floor(Math.random()*outcomes.length)]
+let win=reels.every(v=>v===reels[0])
 
-msg(r)
+if(win){
+
+msg("🎉 JACKPOT!")
+
+document.querySelectorAll(".reel").forEach(r=>r.classList.add("win"))
+
+}else{
+
+if(Math.random()<0.6){
+
+msg("🔥 Quasi jackpot!")
+
+}else{
+
+msg("Quasi! Riprova...")
+
+}
+
+}
 
 }
 
@@ -146,15 +237,21 @@ document.getElementById("msg").innerText=t
 
 function bonus(){
 
-window.open("https://ko-fi.com/peccatinascosti","_blank")
+window.open("https://py.pl/NgwlYzmOBdKPXNEvL5zfjA","_blank")
 
 }
 
-let jackpot=500
+function updateLuck(){
+
+document.getElementById("luck").style.width=luck+"%"
+
+}
+
+let jackpot=987
 
 setInterval(()=>{
 
-jackpot+=Math.floor(Math.random()*10)
+jackpot+=Math.floor(Math.random()*15)
 
 document.getElementById("jackpot").innerText=jackpot
 
@@ -162,7 +259,7 @@ document.getElementById("jackpot").innerText=jackpot
 
 function fakePlayers(){
 
-let n=150+Math.floor(Math.random()*120)
+let n=120+Math.floor(Math.random()*250)
 
 document.getElementById("players").innerText=n+" giocatori online"
 
@@ -171,6 +268,20 @@ document.getElementById("players").innerText=n+" giocatori online"
 setInterval(fakePlayers,4000)
 
 fakePlayers()
+
+let names=["Marco","Luca","Sara","Giulia","Andrea","Paolo","Anna"]
+
+function fakeWin(){
+
+let name=names[Math.floor(Math.random()*names.length)]
+
+let amount=10+Math.floor(Math.random()*50)
+
+document.getElementById("popup").innerText=name+" ha vinto "+amount+"€"
+
+}
+
+setInterval(fakeWin,7000)
 
 </script>
 
