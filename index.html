@@ -1,95 +1,63 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 
-<title>Super Jackpot Slot</title>
+<title>Animal Memory Challenge</title>
 
 <style>
 
 body{
-background:#070707;
-color:white;
 font-family:Arial;
+background:#f5f5f5;
 text-align:center;
 }
 
 h1{
-color:#ffb300;
+margin-top:20px;
 }
 
-.jackpot{
-font-size:36px;
-color:#00ff9d;
+.info{
 margin-top:10px;
+font-size:18px;
 }
 
-.bar{
-width:280px;
-height:18px;
-background:#333;
-margin:auto;
-margin-top:10px;
-}
+.grid{
 
-.progress{
-height:100%;
-width:0%;
-background:#ffb300;
-}
-
-.slot{
-display:flex;
+display:grid;
+grid-template-columns:repeat(4,80px);
+gap:10px;
 justify-content:center;
-gap:12px;
-margin-top:40px;
+margin-top:25px;
+
 }
 
-.reel{
-width:70px;
+.card{
+
+width:80px;
 height:80px;
 font-size:40px;
-background:#1e1e1e;
 display:flex;
 align-items:center;
 justify-content:center;
-border:3px solid #444;
+background:#4CAF50;
+color:white;
+cursor:pointer;
+border-radius:8px;
+
+}
+
+.card.open{
+background:white;
+color:black;
 }
 
 button{
-margin-top:25px;
-padding:14px 28px;
-font-size:18px;
-background:#ffb300;
-border:none;
+
+margin-top:15px;
+padding:10px 18px;
+font-size:16px;
 cursor:pointer;
-}
 
-.players{
-font-size:14px;
-color:#aaa;
-}
-
-.popup{
-
-position:fixed;
-bottom:20px;
-left:20px;
-background:#111;
-padding:12px;
-border:1px solid #333;
-font-size:14px;
-
-}
-
-.win{
-animation:flash 0.4s infinite;
-}
-
-@keyframes flash{
-0%{background:#1e1e1e}
-50%{background:#ffb300}
-100%{background:#1e1e1e}
 }
 
 </style>
@@ -98,190 +66,167 @@ animation:flash 0.4s infinite;
 
 <body>
 
-<h1>Super Jackpot Slot</h1>
+<h1>Animal Memory 🧩</h1>
 
-<p class="players" id="players"></p>
-
-<div class="jackpot">
-💰 Jackpot: <span id="jackpot">987</span> €
+<div class="info">
+⏱ Tempo: <span id="time">0</span>s
 </div>
 
-<div class="bar">
-<div class="progress" id="luck"></div>
+<div class="info">
+🏆 Record: <span id="record">-</span>
 </div>
 
-<div class="slot">
-
-<div class="reel" id="r1">❔</div>
-<div class="reel" id="r2">❔</div>
-<div class="reel" id="r3">❔</div>
-<div class="reel" id="r4">❔</div>
-<div class="reel" id="r5">❔</div>
-
-</div>
+<div class="grid" id="grid"></div>
 
 <p id="msg"></p>
 
-<button onclick="spin()">
-🎰 Gira la Slot
-</button>
-
-<br>
-
-<button onclick="bonus()">
-🎰 Sblocca altri giri (1€)
-</button>
-
-<div class="popup" id="popup"></div>
+<button onclick="restart()">🔄 Rigioca</button>
 
 <script>
 
-let spins=1
-let luck=0
+let animals=["🐶","🐱","🐸","🐵","🐰","🐼","🦊","🐯"]
 
-let symbols=["💎","💰","⭐","🍀","🔔","7️⃣"]
+let cards=[...animals,...animals]
 
-function spin(){
+let first=null
+let second=null
+let lock=false
+let matches=0
 
-if(spins<=0){
+let time=0
+let timer=null
 
-msg("Hai finito i giri gratis")
+let record=localStorage.getItem("record")
+
+if(record){
+document.getElementById("record").innerText=record+"s"
+}
+
+startGame()
+
+function startGame(){
+
+cards.sort(()=>Math.random()-0.5)
+
+let grid=document.getElementById("grid")
+
+grid.innerHTML=""
+
+matches=0
+
+cards.forEach(a=>{
+
+let div=document.createElement("div")
+
+div.className="card"
+
+div.innerText="?"
+
+div.dataset.animal=a
+
+div.onclick=()=>flip(div)
+
+grid.appendChild(div)
+
+})
+
+time=0
+
+document.getElementById("time").innerText=time
+
+clearInterval(timer)
+
+timer=setInterval(()=>{
+
+time++
+
+document.getElementById("time").innerText=time
+
+},1000)
+
+}
+
+function flip(card){
+
+if(lock || card.classList.contains("open")) return
+
+card.innerText=card.dataset.animal
+
+card.classList.add("open")
+
+if(!first){
+
+first=card
 
 return
 
 }
 
-spins--
+second=card
 
-spinReel("r1",1000)
-spinReel("r2",1500)
-spinReel("r3",2000)
-spinReel("r4",2500)
-spinReel("r5",3000)
+lock=true
 
-luck+=20
+if(first.dataset.animal===second.dataset.animal){
 
-updateLuck()
+matches++
 
-setTimeout(result,3100)
+reset()
+
+if(matches===8){
+
+clearInterval(timer)
+
+document.getElementById("msg").innerText="🎉 Puzzle completato!"
+
+saveRecord()
 
 }
 
-function spinReel(id,time){
-
-let reel=document.getElementById(id)
-
-let interval=setInterval(()=>{
-
-reel.innerText=randomSymbol()
-
-},100)
+}else{
 
 setTimeout(()=>{
 
-clearInterval(interval)
+first.innerText="?"
+second.innerText="?"
 
-reel.innerText=randomSymbol()
+first.classList.remove("open")
+second.classList.remove("open")
 
-},time)
+reset()
 
-}
-
-function randomSymbol(){
-
-return symbols[Math.floor(Math.random()*symbols.length)]
-
-}
-
-function result(){
-
-let reels=[
-
-r1.innerText,
-r2.innerText,
-r3.innerText,
-r4.innerText,
-r5.innerText
-
-]
-
-let win=reels.every(v=>v===reels[0])
-
-if(win){
-
-msg("🎉 JACKPOT!")
-
-document.querySelectorAll(".reel").forEach(r=>r.classList.add("win"))
-
-}else{
-
-if(Math.random()<0.6){
-
-msg("🔥 Quasi jackpot!")
-
-}else{
-
-msg("Quasi! Riprova...")
+},700)
 
 }
 
 }
 
-}
+function reset(){
 
-function msg(t){
-
-document.getElementById("msg").innerText=t
-
-}
-
-function bonus(){
-
-window.open("https://py.pl/NgwlYzmOBdKPXNEvL5zfjA","_blank")
+first=null
+second=null
+lock=false
 
 }
 
-function updateLuck(){
+function restart(){
 
-document.getElementById("luck").style.width=luck+"%"
+startGame()
 
-}
-
-let jackpot=987
-
-setInterval(()=>{
-
-jackpot+=Math.floor(Math.random()*15)
-
-document.getElementById("jackpot").innerText=jackpot
-
-},3000)
-
-function fakePlayers(){
-
-let n=120+Math.floor(Math.random()*250)
-
-document.getElementById("players").innerText=n+" giocatori online"
+document.getElementById("msg").innerText=""
 
 }
 
-setInterval(fakePlayers,4000)
+function saveRecord(){
 
-fakePlayers()
+if(!record || time<record){
 
-let names=["Marco","Luca","Sara","Giulia","Andrea","Paolo","Anna"]
+localStorage.setItem("record",time)
 
-function fakeWin(){
-
-let name=names[Math.floor(Math.random()*names.length)]
-
-let amount=10+Math.floor(Math.random()*50)
-
-document.getElementById("popup").innerText=name+" ha vinto "+amount+"€"
+document.getElementById("record").innerText=time+"s"
 
 }
 
-setInterval(fakeWin,7000)
+}
 
 </script>
 
